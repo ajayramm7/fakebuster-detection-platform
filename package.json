@@ -1,0 +1,17 @@
+{
+  "name": "fakebuster-mern",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently \"npm run dev:ml\" \"npm run dev:api\" \"npm run dev:client\"",
+    "dev:ml": ".\\venv\\Scripts\\python.exe ml-service\\app.py",
+    "dev:api": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "npm run start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
