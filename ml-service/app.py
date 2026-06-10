@@ -233,11 +233,38 @@ def predict_batch():
     if not isinstance(texts, list) or not texts:
         return jsonify({"error": "A non-empty texts array is required."}), 400
 
-    try:
-        predictions = [predict_record(task, text, threshold) for text in texts]
-        return jsonify({"task": task, "count": len(predictions), "predictions": predictions})
-    except Exception as error:
-        return jsonify({"error": f"Batch prediction failed: {error}"}), 500
+    predictions = []
+    for text in texts:
+        try:
+            predictions.append(predict_record(task, text, threshold))
+        except ValueError as e:
+            predictions.append({
+                "task": task,
+                "label": "No Text",
+                "rawPrediction": None,
+                "riskScore": 0.0,
+                "riskLevel": "low",
+                "isRisky": False,
+                "signals": [],
+                "explanation": str(e),
+                "safetyTip": "Provide valid text for prediction.",
+                "textLength": 0
+            })
+        except Exception as e:
+            predictions.append({
+                "task": task,
+                "label": "Error",
+                "rawPrediction": None,
+                "riskScore": 0.0,
+                "riskLevel": "unknown",
+                "isRisky": False,
+                "signals": [],
+                "explanation": f"Prediction error: {e}",
+                "safetyTip": "An error occurred during prediction.",
+                "textLength": 0
+            })
+
+    return jsonify({"task": task, "count": len(predictions), "predictions": predictions})
 
 
 load_artifacts()

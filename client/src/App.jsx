@@ -80,7 +80,7 @@ function ServiceBadge({ label, online }) {
   );
 }
 
-function ResultPanel({ result, onFeedback, feedbackLoading, loading }) {
+function ResultPanel({ result, onFeedback, feedbackLoading, loading, currentFeedback }) {
   if (!result && !loading) return null;
 
   if (loading) {
@@ -132,15 +132,15 @@ function ResultPanel({ result, onFeedback, feedbackLoading, loading }) {
 
       <div className="feedback-row">
         <span>Feedback</span>
-        <button type="button" onClick={() => onFeedback("correct")} disabled={feedbackLoading}>
+        <button type="button" className={currentFeedback === "correct" ? "active" : ""} onClick={() => onFeedback("correct")} disabled={feedbackLoading}>
           <ThumbsUp size={16} />
           Correct
         </button>
-        <button type="button" onClick={() => onFeedback("wrong")} disabled={feedbackLoading}>
+        <button type="button" className={currentFeedback === "wrong" ? "active" : ""} onClick={() => onFeedback("wrong")} disabled={feedbackLoading}>
           <ThumbsDown size={16} />
           Wrong
         </button>
-        <button type="button" onClick={() => onFeedback("unsure")} disabled={feedbackLoading}>
+        <button type="button" className={currentFeedback === "unsure" ? "active" : ""} onClick={() => onFeedback("unsure")} disabled={feedbackLoading}>
           <HelpCircle size={16} />
           Unsure
         </button>
@@ -249,6 +249,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [batchLoading, setBatchLoading] = useState(false);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [currentFeedback, setCurrentFeedback] = useState(null);
   const [file, setFile] = useState(null);
   const [textColumn, setTextColumn] = useState("");
 
@@ -282,6 +283,7 @@ export default function App() {
     event.preventDefault();
     setError("");
     setLoading(true);
+    setCurrentFeedback(null);
 
     try {
       const data = await predictText({ task, text, threshold });
@@ -320,6 +322,7 @@ export default function App() {
     setFeedbackLoading(true);
     try {
       await submitFeedback({ predictionId: result.id, rating });
+      setCurrentFeedback(rating);
       await refresh();
     } catch (feedbackError) {
       setError(feedbackError.message);
@@ -331,6 +334,7 @@ export default function App() {
   function useSample() {
     setText(TASKS[task].sample);
     setResult(null);
+    setCurrentFeedback(null);
   }
 
   function handleReanalyze(historyItem) {
@@ -483,6 +487,7 @@ export default function App() {
               onFeedback={handleFeedback}
               feedbackLoading={feedbackLoading}
               loading={loading}
+              currentFeedback={currentFeedback}
             />
           </section>
         )}
